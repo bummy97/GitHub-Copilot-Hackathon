@@ -1,0 +1,8 @@
+{
+  "name": "github-copilot-hackathon",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

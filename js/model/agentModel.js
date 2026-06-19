@@ -107,6 +107,7 @@ export class AgentModel {
     if (text.includes('문서') || text.includes('요약')) return '📄';
     if (text.includes('코드') || text.includes('개발') || text.includes('프로그래밍')) return '💻';
     if (text.includes('데이터') || text.includes('분석')) return '📊';
+    if (text.includes('뉴스') || text.includes('브리핑')) return '📰';
     if (text.includes('금융') || text.includes('주가') || text.includes('증시')) return '📈';
     if (text.includes('업황') || text.includes('채팅') || text.includes('브리핑')) return '💹';
     if (text.includes('마케팅') || text.includes('광고')) return '📣';
