@@ -5,6 +5,8 @@ const STORAGE_KEY = 'agentPortal.userAgents';
 const ALLOWED_HOSTS = [];
 
 const SEED_AGENTS = [
+  { id: 'seed-0801', name: '대덕전자 업황 확인', description: 'MCP 툴로 대덕전자 주가·뉴스·업황을 채팅으로 바로 확인합니다.', url: 'http://localhost:5600/chat', tags: ['대덕전자 인사이트', '업황', '채팅'], embeddable: true, createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z' },
+  { id: 'seed-0901', name: '대덕전자 뉴스 확인', description: '대덕전자 관련 최신 뉴스와 주가를 확인할 수 있는 전용 Agent입니다.', url: 'http://localhost:5600', tags: ['대덕전자 인사이트', '뉴스', '주가'], embeddable: true, createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z' },
   { id: 'seed-1001', name: '회의록 요약 봇', description: '긴 회의 내용을 핵심 요약과 액션 아이템으로 정리합니다.', url: 'https://example.com/agents/meeting-summary', tags: ['문서 요약', '생산성'], embeddable: true, createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z' },
   { id: 'seed-1002', name: '보고서 TL;DR 생성기', description: '장문의 보고서를 1분 내 읽을 수 있는 요약본으로 변환합니다.', url: 'https://example.com/agents/report-tldr', tags: ['문서 요약', '리포트'], embeddable: true, createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z' },
   { id: 'seed-1003', name: '계약서 핵심 조항 추출', description: '계약서에서 리스크 조항과 주요 조건만 추려서 보여줍니다.', url: 'https://example.com/agents/contract-summary', tags: ['문서 요약', '법무'], embeddable: true, createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z' },
@@ -65,7 +67,10 @@ export class AgentModel {
     let url;
     try { url = new URL(input); }
     catch { return { ok: false, message: '유효하지 않은 URL 형식입니다.' }; }
-    if (url.protocol !== 'https:') return { ok: false, message: 'HTTPS URL만 허용됩니다.' };
+    const isLocalhost = ['localhost', '127.0.0.1'].includes(url.hostname);
+    if (url.protocol !== 'https:' && !(url.protocol === 'http:' && isLocalhost)) {
+      return { ok: false, message: 'HTTPS URL만 허용됩니다. (로컬 테스트는 http://localhost 허용)' };
+    }
     if (ALLOWED_HOSTS.length && !ALLOWED_HOSTS.some(h => url.hostname === h || url.hostname.endsWith('.' + h))) {
       return { ok: false, message: '허용되지 않은 도메인입니다.' };
     }
@@ -102,6 +107,8 @@ export class AgentModel {
     if (text.includes('문서') || text.includes('요약')) return '📄';
     if (text.includes('코드') || text.includes('개발') || text.includes('프로그래밍')) return '💻';
     if (text.includes('데이터') || text.includes('분석')) return '📊';
+    if (text.includes('금융') || text.includes('주가') || text.includes('증시')) return '📈';
+    if (text.includes('업황') || text.includes('채팅') || text.includes('브리핑')) return '💹';
     if (text.includes('마케팅') || text.includes('광고')) return '📣';
     if (text.includes('고객') || text.includes('q&a') || text.includes('상담')) return '💬';
     if (text.includes('hr') || text.includes('인사')) return '👥';

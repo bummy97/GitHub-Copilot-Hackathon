@@ -315,6 +315,15 @@ form {
     grid-template-columns: 280px 1fr;
     gap: 20px;
     align-items: stretch;
+    transition: grid-template-columns 0.25s ease;
+}
+
+.agent-layout.wide {
+    grid-template-columns: 1fr;
+}
+
+.agent-layout.wide .agent-sidebar {
+    display: none;
 }
 
 .agent-sidebar {

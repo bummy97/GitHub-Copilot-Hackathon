@@ -1,0 +1,20 @@
+{
+  "name": "daeduck-mcp-agent",
+  "version": "1.0.0",
+  "description": "Daeduck Electronics news/stock agent with MCP tools and web UI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "mcp": "node mcp-server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "express": "^5.2.1",
+    "fast-xml-parser": "^5.9.2",
+    "zod": "^3.25.76"
+  }
+}

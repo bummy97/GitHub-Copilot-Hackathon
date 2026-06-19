@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>대덕전자 뉴스/주가 Agent</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #5d6b85;
+      --border: #dde5f1;
+      --primary: #173b8c;
+      --primary-d: #112d6d;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+      background: radial-gradient(circle at top right, #e6efff, transparent 42%), var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 16px 36px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0f1f43, #1f458f);
+      color: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .actions {
+      margin-top: 14px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+    }
+
+    button:hover { background: var(--primary-d); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .stock-line {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: baseline;
+    }
+
+    .price {
+      font-size: 34px;
+      font-weight: 800;
+      color: #0f2f78;
+    }
+
+    .delta { font-weight: 700; }
+    .delta.up { color: #c3183b; }
+    .delta.down { color: #1e64d6; }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+
+    .news-item {
+      display: grid;
+      grid-template-columns: 104px 1fr;
+      gap: 12px;
+      align-items: start;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fbfdff;
+    }
+
+    .news-thumb {
+      width: 104px;
+      height: 72px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid #d7e1f2;
+      background: #edf3ff;
+    }
+
+    .news-content {
+      min-width: 0;
+    }
+
+    a {
+      color: #1141a8;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 24px; }
+      .price { font-size: 28px; }
+      .news-item { grid-template-columns: 1fr; }
+      .news-thumb { width: 100%; height: 168px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>대덕전자 뉴스/주가 Agent</h1>
+      <p>대덕전자(353200) 관련 최신 뉴스와 주가를 한 화면에서 확인합니다.</p>
+      <div class="actions">
+        <button id="refresh-stock" type="button">주가 새로고침</button>
+        <button id="refresh-news" type="button">뉴스 새로고침</button>
+        <button id="refresh-all" type="button">전체 새로고침</button>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>실시간 주가</h2>
+        <div class="stock-line">
+          <span id="price" class="price">-</span>
+          <span id="delta" class="delta">-</span>
+        </div>
+        <p id="stock-time" class="muted">데이터 로딩 중...</p>
+      </article>
+
+      <article class="card">
+        <h2>최신 뉴스</h2>
+        <ul id="news-list"></ul>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    const $price = document.getElementById('price');
+    const $delta = document.getElementById('delta');
+    const $stockTime = document.getElementById('stock-time');
+    const $newsList = document.getElementById('news-list');
+
+    function toCurrency(value) {
+      if (typeof value !== 'number') return '-';
+      return value.toLocaleString('ko-KR');
+    }
+
+    async function loadStock() {
+      const response = await fetch('/api/stock');
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || '주가 조회 실패');
+
+      const stock = data.stock;
+      $price.textContent = `${toCurrency(stock.currentPrice)} KRW`;
+
+      const change = typeof stock.change === 'number' ? stock.change.toFixed(2) : '-';
+      const pct = typeof stock.changePercent === 'number' ? stock.changePercent.toFixed(2) : '-';
+      $delta.textContent = `${change} (${pct}%)`;
+      $delta.classList.remove('up', 'down');
+      if (Number(stock.change) > 0) $delta.classList.add('up');
+      if (Number(stock.change) < 0) $delta.classList.add('down');
+
+      $stockTime.textContent = stock.marketTime
+        ? `기준 시각: ${new Date(stock.marketTime).toLocaleString('ko-KR')}`
+        : '기준 시각 정보 없음';
+    }
+
+    async function loadNews() {
+      const response = await fetch('/api/news?limit=8');
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || '뉴스 조회 실패');
+
+      $newsList.replaceChildren();
+      if (!data.news.length) {
+        const li = document.createElement('li');
+        li.textContent = '표시할 뉴스가 없습니다.';
+        $newsList.append(li);
+        return;
+      }
+
+      data.news.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'news-item';
+
+        if (item.thumbnail) {
+          const thumb = document.createElement('img');
+          thumb.className = 'news-thumb';
+          thumb.src = item.thumbnail;
+          thumb.alt = '뉴스 썸네일';
+          thumb.loading = 'lazy';
+          thumb.addEventListener('error', () => {
+            thumb.remove();
+            li.style.gridTemplateColumns = '1fr';
+          });
+          li.append(thumb);
+        }
+
+        const content = document.createElement('div');
+        content.className = 'news-content';
+
+        const a = document.createElement('a');
+        a.href = item.link;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = item.title;
+
+        const meta = document.createElement('div');
+        meta.className = 'muted';
+        meta.textContent = `${item.source || '출처 미상'} · ${item.publishedAt || '-'}`;
+
+        content.append(a, meta);
+        li.append(content);
+        $newsList.append(li);
+      });
+    }
+
+    async function refreshAll() {
+      try {
+        await Promise.all([loadStock(), loadNews()]);
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    document.getElementById('refresh-stock').addEventListener('click', async () => {
+      try { await loadStock(); } catch (error) { alert(error.message); }
+    });
+
+    document.getElementById('refresh-news').addEventListener('click', async () => {
+      try { await loadNews(); } catch (error) { alert(error.message); }
+    });
+
+    document.getElementById('refresh-all').addEventListener('click', refreshAll);
+
+    refreshAll();
+  </script>
+</body>
+</html>

@@ -102,7 +102,15 @@ function bindEvents() {
   };
   view.navRegister.onclick = () => view.showView('register');
   view.cancelRegister.onclick = () => view.showView('catalog');
-  view.runBack.onclick = () => view.showView('catalog');
+
+  const agentLayout = document.querySelector('.agent-layout');
+  const runExpand = document.getElementById('run-expand');
+  runExpand.addEventListener('click', () => {
+    const isWide = agentLayout.classList.toggle('wide');
+    runExpand.textContent = isWide ? '⛶ 원래 보기' : '⛶ 넓게 보기';
+  });
+
+  view.runBack.onclick = () => { agentLayout.classList.remove('wide'); runExpand.textContent = '⛶ 넓게 보기'; view.showView('catalog'); };
 
   view.search.addEventListener('input', debounce(renderCatalog, SEARCH_DEBOUNCE_MS));
   view.agentMenuSearch.addEventListener('input', debounce(renderAgentMenu, SEARCH_DEBOUNCE_MS));

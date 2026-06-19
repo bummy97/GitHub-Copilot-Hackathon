@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>대덕전자 업황 확인 Agent</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #fff;
+      --border: #dde5f1;
+      --primary: #173b8c;
+      --primary-d: #112d6d;
+      --text: #172033;
+      --muted: #5d6b85;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #0f1f43, #1f458f);
+      color: #fff;
+      padding: 16px 20px;
+      flex-shrink: 0;
+    }
+    .header h1 { font-size: 18px; font-weight: 700; }
+    .header p  { font-size: 13px; color: rgba(255,255,255,.75); margin-top: 4px; }
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .chip {
+      border: 1px solid rgba(255,255,255,.35);
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .chip:hover { background: rgba(255,255,255,.22); }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .msg {
+      max-width: 82%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      line-height: 1.65;
+      font-size: 14px;
+      word-break: break-word;
+    }
+    .msg.user {
+      align-self: flex-end;
+      background: var(--primary);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.bot {
+      align-self: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+    .msg.bot a { color: var(--primary); }
+    .msg.bot hr { border: 0; border-top: 1px solid var(--border); margin: 8px 0; }
+    .typing {
+      align-self: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+    .input-row input:focus { border-color: var(--primary); }
+    .input-row button {
+      background: var(--primary);
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .input-row button:hover { background: var(--primary-d); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📊 대덕전자 업황 확인 Agent</h1>
+    <p>MCP 툴(주가·뉴스 조회)을 활용해 대덕전자 업황을 알려드립니다.</p>
+    <div class="chips">
+      <button class="chip" data-q="대덕전자 업황 어때?">업황 브리핑</button>
+      <button class="chip" data-q="오늘 주가 알려줘">주가 조회</button>
+      <button class="chip" data-q="최신 뉴스 알려줘">최신 뉴스</button>
+      <button class="chip" data-q="대덕전자 현황 요약해줘">현황 요약</button>
+    </div>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="msg bot">안녕하세요! 대덕전자 업황 확인 Agent입니다 👋<br><br>
+      주가, 뉴스, 업황 브리핑을 질문해보세요.<br>
+      예) "오늘 대덕전자 주가 어때?", "최신 뉴스 보여줘", "업황 요약해줘"
+    </div>
+  </div>
+
+  <div class="input-row">
+    <input id="msg-input" type="text" placeholder="질문을 입력하세요 (예: 오늘 주가 어때?)" autocomplete="off" />
+    <button id="send-btn">전송</button>
+  </div>
+
+  <script>
+    const $messages = document.getElementById('messages');
+    const $input    = document.getElementById('msg-input');
+    const $send     = document.getElementById('send-btn');
+
+    function isCapabilityQuestion(text) {
+      const m = text.replace(/\s+/g, ' ').toLowerCase();
+      return (
+        m.includes('브리핑 말고') ||
+        m.includes('다른 건') ||
+        (m.includes('다른') && m.includes('알려')) ||
+        m.includes('기능') ||
+        m.includes('뭐 있어') ||
+        m.includes('뭘 할 수') ||
+        m.includes('무엇을')
+      );
+    }
+
+    function getCapabilityReply() {
+      return [
+        '🧭 **대덕전자 업황 확인 Agent가 알려줄 수 있는 것**',
+        '',
+        '1. **주가 조회**: 현재가, 전일 대비, 변동률',
+        '2. **최신 뉴스**: 대덕전자 관련 기사 목록',
+        '3. **업황 브리핑**: 주가 + 뉴스를 묶은 종합 요약',
+        '',
+        '예시 질문',
+        '- 오늘 주가 어때?',
+        '- 최신 뉴스만 보여줘',
+        '- 업황 요약해줘',
+        '- 브리핑 말고 다른 건 뭐 알려줄 수 있어?'
+      ].join('\n');
+    }
+
+    function renderText(raw) {
+      return raw
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/🔗 (https?:\/\/\S+)/g, '🔗 <a href="$1" target="_blank" rel="noopener noreferrer">링크 열기</a>')
+        .replace(/---/g, '<hr>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function addMsg(html, role) {
+      const el = document.createElement('div');
+      el.className = 'msg ' + role;
+      if (role === 'bot') {
+        el.innerHTML = renderText(html);
+      } else {
+        el.textContent = html;
+      }
+      $messages.appendChild(el);
+      $messages.scrollTop = $messages.scrollHeight;
+      return el;
+    }
+
+    function addTyping() {
+      const el = document.createElement('div');
+      el.className = 'typing';
+      el.textContent = 'MCP 툴 호출 중…';
+      $messages.appendChild(el);
+      $messages.scrollTop = $messages.scrollHeight;
+      return el;
+    }
+
+    async function send(text) {
+      const q = (text || $input.value).trim();
+      if (!q) return;
+      $input.value = '';
+      addMsg(q, 'user');
+
+      if (isCapabilityQuestion(q)) {
+        addMsg(getCapabilityReply(), 'bot');
+        return;
+      }
+
+      const typing = addTyping();
+      try {
+        const r = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: q })
+        });
+        const data = await r.json();
+        typing.remove();
+        addMsg(data.reply || data.error || '응답을 받지 못했습니다.', 'bot');
+      } catch (e) {
+        typing.remove();
+        addMsg('서버 연결 오류: ' + e.message, 'bot');
+      }
+    }
+
+    $send.addEventListener('click', () => send());
+    $input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+    document.querySelectorAll('.chip').forEach(c =>
+      c.addEventListener('click', () => send(c.dataset.q))
+    );
+  </script>
+</body>
+</html>
