@@ -1,0 +1,1326 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Copilot Agent Portal</title>
+    <style>
+        :root {
+            --bg: #f5f5f7;
+            --card: #ffffff;
+            --border: #e0e0e0;
+            --text: #1d1d1f;
+            --muted: #6e6e73;
+            --primary: #0066cc;
+            --primary-d: #0053a6;
+            --focus: #0071e3;
+            --dark: #000000;
+            --dark-tile: #272729;
+            --dark-tile-2: #2a2a2c;
+            --danger: #d92c2c;
+            --radius: 18px;
+            --radius-sm: 8px;
+            --radius-pill: 9999px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.47;
+            font-size: 17px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 44px;
+            padding: 8px 22px;
+            background: var(--dark);
+            border-bottom: 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+            header h1 {
+                font-size: 14px;
+                font-weight: 400;
+                letter-spacing: -0.01em;
+                margin: 0;
+                cursor: pointer;
+                color: #f5f5f7;
+            }
+
+            header nav {
+                display: flex;
+                gap: 6px;
+            }
+
+        main {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 28px 24px 56px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Buttons */
+        button {
+            font: inherit;
+            cursor: pointer;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border);
+            background: var(--card);
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            transition: transform 0.12s ease, background-color 0.2s ease, border-color 0.2s ease;
+            color: var(--text);
+        }
+
+            button:hover {
+                background: #f9f9fb;
+                border-color: #d5d5da;
+            }
+
+            button:active {
+                transform: scale(0.95);
+            }
+
+            button:focus-visible {
+                outline: 2px solid var(--focus);
+                outline-offset: 2px;
+            }
+
+        header nav button {
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            background: transparent;
+            color: #f5f5f7;
+        }
+
+            header nav button:hover {
+                background: rgba(255, 255, 255, 0.12);
+                border-color: rgba(255, 255, 255, 0.34);
+            }
+
+        header nav .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+            header nav .btn-primary:hover {
+                background: var(--primary-d);
+                border-color: var(--primary-d);
+            }
+
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+            .btn-primary:hover {
+                background: var(--primary-d);
+                border-color: var(--primary-d);
+            }
+
+        .btn-danger {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* Search + filter */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+            .toolbar input[type="search"] {
+                flex: 1;
+                min-width: 220px;
+                height: 44px;
+                padding: 10px 20px;
+                border: 1px solid rgba(0, 0, 0, 0.08);
+                border-radius: var(--radius-pill);
+                font: inherit;
+                background: #fff;
+                color: var(--text);
+                transition: border-color 0.2s ease;
+            }
+
+            .toolbar input[type="search"]:focus {
+                outline: none;
+                border-color: var(--focus);
+            }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .chip {
+            padding: 8px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 14px;
+            font-weight: 400;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+        }
+
+            .chip.active {
+                background: var(--primary);
+                border-color: var(--primary);
+                color: #fff;
+            }
+
+        /* Cards */
+        .grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .card h3 {
+                margin: 0 0 8px;
+                font-size: 34px;
+                font-weight: 600;
+                line-height: 1.2;
+                letter-spacing: -0.02em;
+            }
+
+            .card .desc {
+                color: var(--muted);
+                font-size: 17px;
+                flex: 1;
+                margin: 0 0 16px;
+            }
+
+            .card .card-tags {
+                display: flex;
+                gap: 6px;
+                flex-wrap: wrap;
+                margin-bottom: 12px;
+            }
+
+                .card .card-tags span {
+                    font-size: 12px;
+                    color: var(--primary);
+                    background: #f5f5f7;
+                    padding: 4px 10px;
+                    border-radius: var(--radius-pill);
+                }
+
+            .card .actions {
+                display: flex;
+                gap: 8px;
+            }
+
+        .empty {
+            color: var(--muted);
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        /* Form */
+        form {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 620px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+            .field label {
+                font-weight: 600;
+                font-size: 14px;
+                letter-spacing: -0.01em;
+            }
+
+            .field input, .field textarea {
+                padding: 11px 14px;
+                border: 1px solid rgba(0, 0, 0, 0.08);
+                border-radius: 11px;
+                font: inherit;
+                width: 100%;
+                transition: border-color 0.2s ease;
+                background: #fff;
+                color: var(--text);
+            }
+
+            .field input:focus, .field textarea:focus {
+                outline: none;
+                border-color: var(--focus);
+            }
+
+            .field textarea {
+                resize: vertical;
+                min-height: 80px;
+            }
+
+            .field .hint {
+                font-size: 12px;
+                color: var(--muted);
+            }
+
+            .field .error {
+                font-size: 13px;
+                color: var(--danger);
+                min-height: 16px;
+            }
+
+        .form-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Run / iframe */
+        .run-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+            .run-head h2 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 600;
+                letter-spacing: -0.01em;
+            }
+
+        .agent-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .agent-sidebar {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px;
+            min-height: 70vh;
+            overflow: auto;
+        }
+
+        .agent-menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .agent-menu-item {
+            width: 100%;
+            text-align: left;
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            border: 1px solid transparent;
+            background: #fff;
+            color: var(--text);
+        }
+
+            .agent-menu-item:hover {
+                background: #f5f5f7;
+                border-color: #e8e8ed;
+            }
+
+            .agent-menu-item.active {
+                background: #f5f9ff;
+                border-color: var(--focus);
+                color: var(--text);
+            }
+
+        .agent-menu-name {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 2px;
+            letter-spacing: -0.01em;
+        }
+
+        .agent-menu-desc {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .agent-stage {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .frame-wrap {
+            position: relative;
+            width: 100%;
+            height: 70vh;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: #fff;
+        }
+
+            .frame-wrap iframe {
+                width: 100%;
+                height: 100%;
+                border: 0;
+            }
+
+        .fallback {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+            background: #f5f5f7;
+            padding: 24px;
+        }
+
+            .fallback p {
+                color: var(--muted);
+                margin: 0;
+                max-width: 420px;
+            }
+
+        /* ===== Kmong-inspired main layout overrides ===== */
+        :root {
+            --kmong-bg: #f7f8fa;
+            --kmong-surface: #ffffff;
+            --kmong-border: #e9edf3;
+            --kmong-text: #212329;
+            --kmong-muted: #6f7682;
+            --kmong-primary: #1f3b8f;
+            --kmong-primary-d: #172c6b;
+        }
+
+        body {
+            background: var(--kmong-bg);
+            color: var(--kmong-text);
+        }
+
+        header {
+            min-height: 64px;
+            padding: 10px 26px;
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid var(--kmong-border);
+            backdrop-filter: blur(6px);
+            justify-content: flex-start;
+        }
+
+            header h1 {
+                color: var(--kmong-text);
+                font-size: 18px;
+                font-weight: 700;
+            }
+
+            header nav {
+                gap: 8px;
+            }
+
+        header nav button {
+            color: var(--kmong-text);
+            border: 1px solid var(--kmong-border);
+            background: #fff;
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 9px 14px;
+        }
+
+            header nav button:hover {
+                background: #f8fafb;
+                border-color: #dfe5ec;
+            }
+
+        .btn-primary,
+        header nav .btn-primary {
+            background: var(--kmong-primary);
+            border-color: var(--kmong-primary);
+            color: #fff;
+        }
+
+            .btn-primary:hover,
+            header nav .btn-primary:hover {
+                background: var(--kmong-primary-d);
+                border-color: var(--kmong-primary-d);
+            }
+
+        main {
+            max-width: 1200px;
+            padding: 26px 20px 56px;
+        }
+
+        .home-hero {
+            background: linear-gradient(135deg, #0f1724 0%, #1b2535 100%);
+            border-radius: 18px;
+            padding: 34px;
+            color: #fff;
+            margin-bottom: 22px;
+        }
+
+        .hero-kicker {
+            margin: 0 0 6px;
+            color: #b6c8ff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .home-hero h2 {
+            margin: 0;
+            font-size: 36px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-sub {
+            margin: 10px 0 0;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+        }
+
+        .home-hero .toolbar {
+            margin: 20px 0 14px;
+        }
+
+        .home-hero .toolbar input[type="search"] {
+            height: 52px;
+            border-radius: 12px;
+            border: 0;
+            padding: 0 18px;
+            box-shadow: none;
+        }
+
+        .quick-cats {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .quick-cat {
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+
+            .quick-cat:hover {
+                background: rgba(255, 255, 255, 0.16);
+                border-color: rgba(255, 255, 255, 0.4);
+            }
+
+        .catalog-section {
+            background: var(--kmong-surface);
+            border: 1px solid var(--kmong-border);
+            border-radius: 16px;
+            padding: 22px;
+        }
+
+        .catalog-head h3 {
+            margin: 0;
+            font-size: 24px;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
+        }
+
+        .catalog-head p {
+            margin: 6px 0 16px;
+            color: var(--kmong-muted);
+            font-size: 15px;
+        }
+
+        .tags {
+            margin-bottom: 16px;
+        }
+
+        .chip {
+            border-radius: 999px;
+            border: 1px solid var(--kmong-border);
+            color: #4a5160;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 12px;
+        }
+
+            .chip.active {
+                border-color: var(--kmong-primary);
+                background: #e8eeff;
+                color: #1f3b8f;
+            }
+
+        .grid {
+            gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        }
+
+        .card {
+            position: relative;
+            border-radius: 14px;
+            border: 1px solid var(--kmong-border);
+            box-shadow: none;
+            padding: 14px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+            .card .card-thumb {
+                width: calc(100% + 28px);
+                height: 120px;
+                margin: -14px -14px 12px;
+                background: linear-gradient(135deg, #eef3ff, #f6f9ff 48%, #e9efff);
+                border-bottom: 1px solid #e9edf3;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .card .card-thumb .emoji {
+                font-size: 46px;
+                line-height: 1;
+            }
+
+            .card .card-thumb .thumb-label {
+                font-size: 13px;
+                font-weight: 700;
+                color: #3e4757;
+                background: rgba(255, 255, 255, 0.82);
+                border: 1px solid #dce3ed;
+                border-radius: 999px;
+                padding: 4px 10px;
+            }
+
+            .card h3 {
+                font-size: 18px;
+                line-height: 1.3;
+                margin: 0 0 6px;
+                font-weight: 700;
+                color: #22242a;
+            }
+
+            .card .desc {
+                font-size: 14px;
+                line-height: 1.5;
+                color: #596071;
+                margin: 0 0 10px;
+            }
+
+                .card .card-tags span {
+                    font-size: 12px;
+                    background: #f3f6fb;
+                    color: #4f596d;
+                    border-radius: 999px;
+                    padding: 3px 9px;
+                }
+
+            .card .actions {
+                margin-top: auto;
+            }
+
+            .card .actions button {
+                width: 100%;
+                border-radius: 10px;
+                border: 0;
+                background: var(--kmong-primary);
+                color: #fff;
+                font-weight: 700;
+            }
+
+                .card .actions button:hover {
+                    background: var(--kmong-primary-d);
+                    border-color: var(--kmong-primary-d);
+                }
+
+        .empty {
+            margin-top: 18px;
+            padding: 18px;
+            border: 1px dashed #d8dee8;
+            border-radius: 12px;
+            background: #fff;
+            color: var(--kmong-muted);
+        }
+
+        @media (max-width: 720px) {
+            header {
+                padding: 12px 16px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            header nav {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 2px;
+            }
+
+            main {
+                padding: 18px 14px 36px;
+            }
+
+            .card h3 {
+                font-size: 28px;
+            }
+
+            .card .desc {
+                font-size: 16px;
+            }
+
+            .home-hero {
+                padding: 24px 18px;
+                border-radius: 14px;
+            }
+
+            .home-hero h2 {
+                font-size: 28px;
+            }
+
+            .catalog-section {
+                padding: 16px;
+            }
+
+            .catalog-head h3 {
+                font-size: 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .agent-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .agent-sidebar {
+                min-height: auto;
+                max-height: 240px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="brand">🤖 Copilot Agent Portal</h1>
+        <nav>
+            <button id="nav-home">HOME</button>
+            <button id="nav-agent">AGENT</button>
+            <button id="nav-register-request" class="btn-primary">등록요청</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- ===== 카탈로그 (FR-1, FR-6) ===== -->
+        <section id="view-catalog">
+            <section class="home-hero">
+                <p class="hero-kicker">퇴근을 빨리하고 싶다면</p>
+                <h2>딱 맞는 에이전트를 찾아보세요</h2>
+                <p class="hero-sub">검증된 Agent를 검색하고, 바로 실행해 업무 속도를 높이세요.</p>
+                <div class="toolbar">
+                    <input id="search" type="search" placeholder="필요한 에이전트 키워드를 검색해보세요" autocomplete="off" />
+                </div>
+                <div class="quick-cats" aria-label="빠른 카테고리">
+                    <button type="button" class="quick-cat">문서 요약</button>
+                    <button type="button" class="quick-cat">코드 리뷰</button>
+                    <button type="button" class="quick-cat">데이터 분석</button>
+                    <button type="button" class="quick-cat">마케팅 카피</button>
+                    <button type="button" class="quick-cat">고객 응대</button>
+                </div>
+            </section>
+
+            <section class="catalog-section">
+                <div class="catalog-head">
+                    <h3>카테고리별 Agent</h3>
+                    <p>업무에 바로 투입 가능한 에이전트를 확인해보세요.</p>
+                </div>
+                <div id="tag-filter" class="tags"></div>
+                <div id="catalog" class="grid"></div>
+            </section>
+
+            <p id="empty" class="empty hidden">조건에 맞는 에이전트가 없습니다.</p>
+        </section>
+
+        <!-- ===== 등록 (FR-3, FR-7) ===== -->
+        <section id="view-register" class="hidden">
+            <h2>에이전트 등록</h2>
+            <form id="register-form" novalidate>
+                <div class="field">
+                    <label for="f-name">이름 *</label>
+                    <input id="f-name" type="text" maxlength="60" required />
+                    <div class="error" data-for="f-name"></div>
+                </div>
+                <div class="field">
+                    <label for="f-desc">설명 *</label>
+                    <textarea id="f-desc" maxlength="300" required></textarea>
+                    <div class="error" data-for="f-desc"></div>
+                </div>
+                <div class="field">
+                    <label for="f-url">URL * (https)</label>
+                    <input id="f-url" type="url" placeholder="https://agents.corp.local/my-agent" required />
+                    <div class="hint">iframe으로 임베드됩니다. HTTPS URL만 허용됩니다.</div>
+                    <div class="error" data-for="f-url"></div>
+                </div>
+                <div class="field">
+                    <label for="f-tags">태그 (쉼표로 구분)</label>
+                    <input id="f-tags" type="text" placeholder="생산성, 요약" />
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">등록</button>
+                    <button type="button" id="cancel-register">취소</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ===== 실행 (FR-4, FR-8) ===== -->
+        <section id="view-run" class="hidden">
+            <div class="agent-layout">
+                <aside class="agent-sidebar">
+                    <div id="agent-menu" class="agent-menu-list"></div>
+                </aside>
+                <div class="agent-stage">
+                    <div class="run-head">
+                        <h2 id="run-title">에이전트를 선택하세요</h2>
+                        <div>
+                            <button id="run-newtab">↗ 새 탭에서 열기</button>
+                            <button id="run-back">← 카탈로그로</button>
+                        </div>
+                    </div>
+                    <div class="frame-wrap">
+                        <iframe id="agent-frame"
+                                sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
+                                referrerpolicy="no-referrer"
+                                title="에이전트 실행 영역"></iframe>
+                        <div id="fallback" class="fallback hidden">
+                            <p>
+                                이 에이전트는 포털 내 임베드를 지원하지 않을 수 있습니다(X-Frame-Options / CSP).
+                                아래 버튼으로 새 탭에서 열어 주세요.
+                            </p>
+                            <button id="fallback-open" class="btn-primary">새 탭에서 열기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module">/* =========================================================
+       Copilot Agent Portal — Phase 1 (TRD §3, §4.1)
+       정적 자산 + localStorage. 빌드 불필요.
+       ========================================================= */
+
+    // ----- 설정 (TRD §8.1, §8.2, §8.4) -----
+    const STORAGE_KEY = 'agentPortal.userAgents';
+    const EMBED_TIMEOUT_MS = 5000;     // iframe load 미발생 시 차단 추정
+    const SEARCH_DEBOUNCE_MS = 150;    // 검색 디바운스
+    // 사내 도메인으로 제한하려면 호스트를 추가하세요. 비어 있으면 모든 https 허용.
+    // 예) ['corp.local']  ->  agents.corp.local, x.corp.local 허용
+    const ALLOWED_HOSTS = [];
+
+    // ----- 시드 데이터 (TRD §4.1: agents.json 대체, 데모용) -----
+        const SEED_AGENTS = [
+            // 문서 요약 (5)
+            {
+                id: 'seed-1001', name: '회의록 요약 봇',
+                description: '긴 회의 내용을 핵심 요약과 액션 아이템으로 정리합니다.',
+                url: 'https://example.com/agents/meeting-summary',
+                tags: ['문서 요약', '생산성'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1002', name: '보고서 TL;DR 생성기',
+                description: '장문의 보고서를 1분 내 읽을 수 있는 요약본으로 변환합니다.',
+                url: 'https://example.com/agents/report-tldr',
+                tags: ['문서 요약', '리포트'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1003', name: '계약서 핵심 조항 추출',
+                description: '계약서에서 리스크 조항과 주요 조건만 추려서 보여줍니다.',
+                url: 'https://example.com/agents/contract-summary',
+                tags: ['문서 요약', '법무'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1004', name: '뉴스 브리핑 메이커',
+                description: '여러 기사 내용을 한 장짜리 데일리 브리핑으로 요약합니다.',
+                url: 'https://example.com/agents/news-briefing',
+                tags: ['문서 요약', '브리핑'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1005', name: '메일 스레드 압축기',
+                description: '길어진 이메일 스레드를 핵심 맥락 중심으로 압축 정리합니다.',
+                url: 'https://example.com/agents/mail-thread-summary',
+                tags: ['문서 요약', '커뮤니케이션'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+
+            // 코드 리뷰 (5)
+            {
+                id: 'seed-1101', name: '코드 리뷰 도우미',
+                description: 'PR 변경분을 분석해 리뷰 코멘트 초안을 제안합니다.',
+                url: 'https://example.com/agents/code-review-assistant',
+                tags: ['코드 리뷰', '개발'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1102', name: '보안 리뷰 스캐너',
+                description: '취약 가능성이 높은 코드 패턴을 리뷰 포인트로 표시합니다.',
+                url: 'https://example.com/agents/security-review',
+                tags: ['코드 리뷰', '보안'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1103', name: '테스트 커버리지 리뷰어',
+                description: '변경 코드 기준으로 필요한 테스트 케이스 누락을 점검합니다.',
+                url: 'https://example.com/agents/test-coverage-review',
+                tags: ['코드 리뷰', '테스트'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1104', name: '리팩터링 제안 리뷰어',
+                description: '중복 코드와 복잡도 높은 구간을 찾아 개선 제안을 제공합니다.',
+                url: 'https://example.com/agents/refactor-review',
+                tags: ['코드 리뷰', '리팩터링'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1105', name: '컨벤션 체크 리뷰어',
+                description: '팀 코딩 컨벤션 기준 위반 항목을 빠르게 식별합니다.',
+                url: 'https://example.com/agents/style-review',
+                tags: ['코드 리뷰', '품질'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+
+            // 데이터 분석 (5)
+            {
+                id: 'seed-1201', name: '매출 인사이트 분석기',
+                description: '월별 매출 데이터를 분석해 이상 구간과 성장 포인트를 알려줍니다.',
+                url: 'https://example.com/agents/sales-insight',
+                tags: ['데이터 분석', '매출'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1202', name: '코호트 리텐션 분석',
+                description: '유저 코호트별 리텐션 추이와 이탈 시점을 시각화합니다.',
+                url: 'https://example.com/agents/cohort-retention',
+                tags: ['데이터 분석', '리텐션'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1203', name: 'A/B 테스트 리포터',
+                description: '실험 결과 유의성 검증과 의사결정 요약을 제공합니다.',
+                url: 'https://example.com/agents/ab-test-reporter',
+                tags: ['데이터 분석', '실험'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1204', name: '로그 이상 탐지 어시스턴트',
+                description: '트래픽/오류 로그에서 비정상 패턴을 자동 탐지합니다.',
+                url: 'https://example.com/agents/log-anomaly',
+                tags: ['데이터 분석', '모니터링'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1205', name: '대시보드 코멘터',
+                description: '대시보드 지표 변화 원인을 자연어로 설명해줍니다.',
+                url: 'https://example.com/agents/dashboard-commenter',
+                tags: ['데이터 분석', '대시보드'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+
+            // 마케팅 카피 (5)
+            {
+                id: 'seed-1301', name: '광고 카피 제너레이터',
+                description: '타깃/톤앤매너에 맞는 광고 문구를 다중 버전으로 생성합니다.',
+                url: 'https://example.com/agents/ad-copy',
+                tags: ['마케팅 카피', '광고'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1302', name: '랜딩페이지 헤드라인 메이커',
+                description: '전환율 중심의 헤드라인과 서브카피를 추천합니다.',
+                url: 'https://example.com/agents/landing-headline',
+                tags: ['마케팅 카피', '랜딩페이지'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1303', name: 'SNS 캡션 어시스턴트',
+                description: '채널별 최적 길이와 말투로 SNS 캡션을 작성합니다.',
+                url: 'https://example.com/agents/social-caption',
+                tags: ['마케팅 카피', 'SNS'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1304', name: '이메일 캠페인 카피봇',
+                description: '오픈율을 높이는 제목과 본문 CTA 카피를 생성합니다.',
+                url: 'https://example.com/agents/email-copy',
+                tags: ['마케팅 카피', '이메일'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1305', name: '브랜드 보이스 카피 체크',
+                description: '카피가 브랜드 톤 가이드에 맞는지 점검해 수정 제안합니다.',
+                url: 'https://example.com/agents/brand-copy-check',
+                tags: ['마케팅 카피', '브랜드'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+
+            // 고객 응대 (5)
+            {
+                id: 'seed-1401', name: '고객 응대 Q&A 봇',
+                description: '자주 묻는 질문에 빠르고 일관된 답변을 제공합니다.',
+                url: 'https://example.com/agents/customer-qa',
+                tags: ['고객 응대', 'Q&A'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1402', name: '불만 티켓 분류기',
+                description: '문의 내용을 감정/긴급도 기준으로 분류해 우선순위를 제안합니다.',
+                url: 'https://example.com/agents/ticket-priority',
+                tags: ['고객 응대', 'CS'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1403', name: '환불 정책 안내 어시스턴트',
+                description: '고객 상황에 맞춰 환불/교환 정책을 친절히 안내합니다.',
+                url: 'https://example.com/agents/refund-policy',
+                tags: ['고객 응대', '정책'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1404', name: '온보딩 안내 챗봇',
+                description: '신규 사용자 초기 설정 과정을 단계별로 안내합니다.',
+                url: 'https://example.com/agents/onboarding-chat',
+                tags: ['고객 응대', '온보딩'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            },
+            {
+                id: 'seed-1405', name: 'HR 정책 Q&A',
+                description: '사내 인사 규정에 대한 질문에 답합니다.',
+                url: 'https://example.com/agents/hr-qna',
+                tags: ['고객 응대', 'HR'], embeddable: true,
+                createdAt: '2026-06-19T09:00:00Z', updatedAt: '2026-06-19T09:00:00Z'
+            }
+        ];
+
+    // ----- 상태 -----
+    let allAgents = [];
+    let activeTag = null;
+    let activeAgentId = null;
+    let embedRequestId = 0;
+
+    // ===== Store (TRD: js/store.js 역할) =====
+    function getUserAgents() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+      catch { return []; }
+    }
+    function setUserAgents(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+    function loadAgents() {
+      allAgents = [...SEED_AGENTS, ...getUserAgents()];
+      return allAgents;
+    }
+    function addAgent(agent) {
+      const list = getUserAgents();
+      list.push(agent);
+      setUserAgents(list);
+      loadAgents();
+    }
+
+    // ===== Validate (TRD: js/validate.js, §8.2) =====
+    function validateAgentUrl(input) {
+      let url;
+      try { url = new URL(input); }
+      catch { return { ok: false, message: '유효하지 않은 URL 형식입니다.' }; }
+      if (url.protocol !== 'https:')
+        return { ok: false, message: 'HTTPS URL만 허용됩니다.' };
+      if (ALLOWED_HOSTS.length &&
+          !ALLOWED_HOSTS.some(h => url.hostname === h || url.hostname.endsWith('.' + h)))
+        return { ok: false, message: '허용되지 않은 도메인입니다.' };
+      return { ok: true, value: url.toString() };
+    }
+
+    // ===== Search (TRD: js/search.js, §8.4) =====
+    function filterAgents(agents, query, tag) {
+      const q = (query || '').trim().toLowerCase();
+      return agents.filter(a => {
+        const matchTag = !tag || (a.tags || []).includes(tag);
+        const matchText = !q ||
+          a.name.toLowerCase().includes(q) ||
+          a.description.toLowerCase().includes(q) ||
+          (a.tags || []).some(t => t.toLowerCase().includes(q));
+        return matchTag && matchText;
+      });
+    }
+    function debounce(fn, ms) {
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    }
+
+    // ===== Embed (TRD: js/embed.js, §8.1) =====
+    function openAgent(agent) {
+            activeAgentId = agent.id;
+            renderAgentMenu();
+      showView('run');
+      $('#run-title').textContent = agent.name;            // XSS-safe
+      const frame = $('#agent-frame');
+      const fallback = $('#fallback');
+      fallback.classList.add('hidden');
+            const requestId = ++embedRequestId;
+
+        const checked = validateAgentUrl(agent.url || '');
+        if (!checked.ok) {
+          frame.src = 'about:blank';
+          fallback.classList.remove('hidden');
+          $('#run-newtab').onclick = null;
+          $('#fallback-open').onclick = null;
+          return;
+        }
+
+      let loaded = false;
+      const onLoad = () => { loaded = true; };
+      frame.addEventListener('load', onLoad, { once: true });
+        frame.src = checked.value;
+
+      // 새 탭 열기 동작 바인딩 (FR-8)
+        const openNewTab = () => window.open(checked.value, '_blank', 'noopener');
+      $('#run-newtab').onclick = openNewTab;
+      $('#fallback-open').onclick = openNewTab;
+
+      // 타임아웃 내 load 미발생 → 임베드 차단 추정 → fallback
+      setTimeout(() => {
+                if (requestId !== embedRequestId) return;
+        if (!loaded) fallback.classList.remove('hidden');
+      }, EMBED_TIMEOUT_MS);
+    }
+
+    // ===== Render (TRD §8.5: textContent 사용, innerHTML 조립 금지) =====
+    function renderTagFilter() {
+      const container = $('#tag-filter');
+      container.replaceChildren();
+      const tags = [...new Set(allAgents.flatMap(a => a.tags || []))].sort();
+      const makeChip = (label, value) => {
+        const b = document.createElement('button');
+        b.className = 'chip' + (activeTag === value ? ' active' : '');
+        b.textContent = label;
+        b.onclick = () => { activeTag = (activeTag === value) ? null : value; render(); };
+        return b;
+      };
+      container.append(makeChip('전체', null));
+      tags.forEach(t => container.append(makeChip('#' + t, t)));
+    }
+
+    function renderCatalog() {
+      const list = filterAgents(allAgents, $('#search').value, activeTag);
+      const grid = $('#catalog');
+      grid.replaceChildren();
+      $('#empty').classList.toggle('hidden', list.length > 0);
+
+            const pickEmoji = (agent) => {
+                const text = `${agent.name} ${(agent.tags || []).join(' ')}`.toLowerCase();
+                if (text.includes('문서') || text.includes('요약')) return '📄';
+                if (text.includes('코드') || text.includes('개발') || text.includes('프로그래밍')) return '💻';
+                if (text.includes('데이터') || text.includes('분석')) return '📊';
+                if (text.includes('마케팅') || text.includes('광고')) return '📣';
+                if (text.includes('고객') || text.includes('q&a') || text.includes('상담')) return '💬';
+                if (text.includes('hr') || text.includes('인사')) return '👥';
+                if (text.includes('보안') || text.includes('정책')) return '🛡️';
+                return '🤖';
+            };
+
+      list.forEach(agent => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+                const thumb = document.createElement('div');
+                thumb.className = 'card-thumb';
+
+                const emoji = document.createElement('span');
+                emoji.className = 'emoji';
+                emoji.textContent = pickEmoji(agent);
+
+                const thumbLabel = document.createElement('span');
+                thumbLabel.className = 'thumb-label';
+                thumbLabel.textContent = (agent.tags && agent.tags[0]) ? `#${agent.tags[0]}` : 'agent';
+
+                thumb.append(emoji, thumbLabel);
+
+        const h3 = document.createElement('h3');
+        h3.textContent = agent.name;
+
+        const desc = document.createElement('p');
+        desc.className = 'desc';
+        desc.textContent = agent.description;
+
+        const tags = document.createElement('div');
+        tags.className = 'card-tags';
+        (agent.tags || []).forEach(t => {
+          const s = document.createElement('span');
+          s.textContent = '#' + t;
+          tags.append(s);
+        });
+
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+        const runBtn = document.createElement('button');
+        runBtn.className = 'btn-primary';
+        runBtn.textContent = '실행';
+        runBtn.onclick = () => openAgent(agent);
+        actions.append(runBtn);
+
+                card.append(thumb, h3, desc, tags, actions);
+        grid.append(card);
+      });
+    }
+
+        function renderAgentMenu() {
+            const menu = $('#agent-menu');
+            menu.replaceChildren();
+
+            if (!allAgents.length) {
+                const empty = document.createElement('p');
+                empty.className = 'empty';
+                empty.textContent = '등록된 에이전트가 없습니다.';
+                menu.append(empty);
+                return;
+            }
+
+            allAgents.forEach(agent => {
+                const item = document.createElement('button');
+                item.className = 'agent-menu-item' + (activeAgentId === agent.id ? ' active' : '');
+
+                const name = document.createElement('span');
+                name.className = 'agent-menu-name';
+                name.textContent = agent.name;
+
+                const desc = document.createElement('span');
+                desc.className = 'agent-menu-desc';
+                desc.textContent = agent.description;
+
+                item.append(name, desc);
+                item.onclick = () => openAgent(agent);
+                menu.append(item);
+            });
+        }
+
+    function render() {
+      renderTagFilter();
+      renderCatalog();
+            renderAgentMenu();
+    }
+
+    // ===== View 전환 =====
+    function showView(name) {
+      ['catalog', 'register', 'run'].forEach(v =>
+        $('#view-' + v).classList.toggle('hidden', v !== name));
+            if (name !== 'run') {
+                $('#agent-frame').src = 'about:blank'; // 리소스 정리
+                $('#fallback').classList.add('hidden');
+            }
+    }
+
+    // ===== 등록 폼 (FR-3) =====
+    function setError(id, msg) {
+      $(`.error[data-for="${id}"]`).textContent = msg || '';
+    }
+    function handleRegister(e) {
+      e.preventDefault();
+      const name = $('#f-name').value.trim();
+      const description = $('#f-desc').value.trim();
+      const urlRaw = $('#f-url').value.trim();
+      const tags = $('#f-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+
+      ['f-name', 'f-desc', 'f-url'].forEach(id => setError(id, ''));
+      let valid = true;
+      if (!name) { setError('f-name', '이름을 입력하세요.'); valid = false; }
+      if (!description) { setError('f-desc', '설명을 입력하세요.'); valid = false; }
+
+      const urlCheck = validateAgentUrl(urlRaw);
+      if (!urlCheck.ok) { setError('f-url', urlCheck.message); valid = false; }
+      if (!valid) return;
+
+      const now = new Date().toISOString();
+      addAgent({
+        id: crypto.randomUUID(),
+        name, description, url: urlCheck.value, tags,
+        embeddable: null, createdAt: now, updatedAt: now
+      });
+
+      e.target.reset();
+      activeTag = null;
+      showView('catalog');
+      render();
+    }
+
+    // ===== 헬퍼 / 초기화 =====
+    function $(sel) { return document.querySelector(sel); }
+
+    function init() {
+      loadAgents();
+      render();
+
+      $('#brand').onclick = () => { showView('catalog'); };
+            $('#nav-home').onclick = () => { showView('catalog'); };
+        $('#nav-agent').onclick = () => {
+          const target = allAgents.find(a => a.id === activeAgentId) || allAgents[0];
+          if (target) openAgent(target);
+          else showView('run');
+        };
+            $('#nav-register-request').onclick = () => { showView('register'); };
+      $('#cancel-register').onclick = () => { showView('catalog'); };
+      $('#run-back').onclick = () => { showView('catalog'); };
+
+      $('#search').addEventListener('input', debounce(renderCatalog, SEARCH_DEBOUNCE_MS));
+            document.querySelectorAll('.quick-cat').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    $('#search').value = btn.textContent.trim();
+                    renderCatalog();
+                });
+            });
+      $('#register-form').addEventListener('submit', handleRegister);
+    }
+
+    init();</script>
+</body>
+</html>
