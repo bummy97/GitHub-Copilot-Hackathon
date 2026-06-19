@@ -3,6 +3,7 @@ import { AgentView } from '../view/agentView.js';
 
 const model = new AgentModel();
 const view = new AgentView();
+let activeAgentMenuTag = null;
 
 function renderTagFilter() {
   view.renderTagFilter(model.getTags(), model.activeTag, value => {
@@ -20,12 +21,20 @@ function renderCatalog() {
 }
 
 function renderAgentMenu() {
-  const menuList = model.filterMenuAgents(view.agentMenuSearch?.value || '');
+  const menuList = model.filterMenuAgents(view.agentMenuSearch?.value || '', activeAgentMenuTag);
   view.renderAgentMenu(menuList, model.activeAgentId, openAgent);
+}
+
+function renderAgentMenuTagFilter() {
+  view.renderAgentMenuTagFilter(model.getTags(), activeAgentMenuTag, value => {
+    activeAgentMenuTag = (activeAgentMenuTag === value) ? null : value;
+    renderAgentMenu();
+  });
 }
 
 function renderAll() {
   renderTagFilter();
+  renderAgentMenuTagFilter();
   renderCatalog();
   renderAgentMenu();
 }
@@ -88,6 +97,7 @@ function handleRegister(e) {
 
   e.target.reset();
   model.activeTag = null;
+  activeAgentMenuTag = null;
   view.showView('catalog');
   renderAll();
 }

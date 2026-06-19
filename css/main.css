@@ -355,6 +355,20 @@ form {
     color: var(--kmong-text);
 }
 
+.agent-menu-tags {
+    margin-bottom: 10px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.agent-menu-tags .chip {
+    flex: 0 0 auto;
+}
+
 .agent-menu-search:focus {
     outline: none;
     border-color: var(--focus);

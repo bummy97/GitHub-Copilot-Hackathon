@@ -9,6 +9,7 @@ export class AgentView {
     this.catalog = this.$('#catalog');
     this.empty = this.$('#empty');
     this.agentMenuSearch = this.$('#agent-menu-search');
+    this.agentMenuTagFilter = this.$('#agent-menu-tag-filter');
     this.agentMenu = this.$('#agent-menu');
     this.runTitle = this.$('#run-title');
     this.runNewtab = this.$('#run-newtab');
@@ -122,6 +123,21 @@ export class AgentView {
       item.onclick = () => onSelect(agent);
       this.agentMenu.append(item);
     });
+  }
+
+  renderAgentMenuTagFilter(tags, activeTag, onToggleTag) {
+    this.clearNode(this.agentMenuTagFilter);
+
+    const makeChip = (label, value) => {
+      const button = document.createElement('button');
+      button.className = 'chip' + (activeTag === value ? ' active' : '');
+      button.textContent = label;
+      button.onclick = () => onToggleTag(value);
+      return button;
+    };
+
+    this.agentMenuTagFilter.append(makeChip('전체', null));
+    tags.forEach(tag => this.agentMenuTagFilter.append(makeChip('#' + tag, tag)));
   }
 
   setError(id, msg) {
